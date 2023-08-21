@@ -1,0 +1,13 @@
+---
+- name: Install Docker
+  ansible.builtin.include_tasks: install_docker.yml
+
+- name: Install Docker Compose
+  ansible.builtin.include_tasks: install_docker_compose.yml
+
+- name: Add users to Docker group
+  ansible.builtin.include_tasks: add_docker_users.yml
+
+- name: Deploy Portainer Agent
+  ansible.builtin.include_tasks: deploy_portainer_agent.yml
+  when: deploy_portainer_agent
