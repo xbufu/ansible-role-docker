@@ -2,7 +2,7 @@
 - name: Check if Docker already exist
   ansible.builtin.command: 'which docker'
   register: docker_exists
-  failed_when: no
+  failed_when: false
   ignore_errors: true
   changed_when: docker_exists.rc != 0
 
@@ -11,9 +11,9 @@
   block:
     - name: Update aptitude repo and cache on all Debian/Ubuntu boxes
       ansible.builtin.apt:
-        update_cache: yes
+        update_cache: true
         cache_valid_time: 3600
-        autoclean: yes
+        autoclean: true
 
     - name: Remove old Docker versions
       ansible.builtin.package:

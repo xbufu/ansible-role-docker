@@ -8,7 +8,7 @@
 - name: Check if previous docker-compose binary is installed
   ansible.builtin.command: 'which docker-compose'
   register: docker_compose_binary
-  failed_when: no
+  failed_when: false
   ignore_errors: true
 
 - name: Remove previous docker-compose binary if it already exists

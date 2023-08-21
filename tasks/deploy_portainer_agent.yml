@@ -1,3 +1,4 @@
+---
 - name: Run portainer agent
   become: false
   community.docker.docker_container:
