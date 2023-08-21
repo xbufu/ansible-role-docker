@@ -37,7 +37,7 @@ Including an example of how to use your role (for instance, with variables passe
           docker_users:
             - bufu
             - user
-          deploy_portainer_agent: True
+          deploy_portainer_agent: true
 ```
 
 License

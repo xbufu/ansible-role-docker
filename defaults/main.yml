@@ -1,4 +1,4 @@
 ---
 docker_users:
   - "{{ ansible_env.SUDO_USER is defined | ternary(ansible_env.SUDO_USER, ansible_user) }}"
-deploy_portainer_agent: True
+deploy_portainer_agent: true
