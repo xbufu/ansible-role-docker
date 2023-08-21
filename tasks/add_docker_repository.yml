@@ -1,0 +1,38 @@
+---
+- name: Remove gpg keys if they exist #otherwise GPG doesn't run if file already exists
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/apt/trusted.gpg.d/docker.gpg
+    - /etc/apt/trusted.gpg.d/docker.gpg_armored
+
+- name: Download Docker gpg key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/trusted.gpg.d/docker.gpg_armored
+
+- name: De-Armor Docker GPG key
+  ansible.builtin.shell: gpg --dearmor < /etc/apt/trusted.gpg.d/docker.gpg_armored > /etc/apt/trusted.gpg.d/docker.gpg
+  args:
+    creates: /etc/apt/trusted.gpg.d/docker.gpg
+
+- name: Remove armored key
+  ansible.builtin.file:
+    path: /etc/apt/trusted.gpg.d/docker.gpg_armored
+    state: absent
+
+  #https://git.deuxfleurs.fr/Deuxfleurs/infrastructure/src/commit/7852eef5a6d0eefc5914f178549f6845857a5c49/os/config/roles/common/tasks/docker.yml
+- name: Add Docker's repository to APT sources list
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ architecture_map[ansible_architecture] }} signed-by=/etc/apt/trusted.gpg.d/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+    filename: docker
+    update_cache: true
+  vars:
+    architecture_map:
+      "x86_64": "amd64"
+      "aarch64": "arm64"
+      "aarch": "arm64"
+      "armhf": "armhf"
+      "armv7l": "armhf"
