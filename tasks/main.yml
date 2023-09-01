@@ -16,4 +16,3 @@
 
 - name: Add users to Docker group
   ansible.builtin.include_tasks: add_docker_users.yml
-
