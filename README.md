@@ -11,12 +11,11 @@ Python & Pip.
 Role Variables
 --------------
 
-You can specify the users to add to the docker group and wether to deploy the Portainer agent or not. By default, it deploys the agent and adds the current user to the docker group.
+You can specify the users to add to the docker group. By default, it adds the current user to the docker group.
 
 ```yml
 docker_users:
   - "{{ ansible_env.SUDO_USER is defined | ternary(ansible_env.SUDO_USER, ansible_user) }}"
-deploy_portainer_agent: True
 ```
 
 Dependencies
@@ -37,7 +36,6 @@ Including an example of how to use your role (for instance, with variables passe
           docker_users:
             - bufu
             - user
-          deploy_portainer_agent: true
 ```
 
 License
@@ -49,3 +47,4 @@ Author Information
 ------------------
 
 Created by xbufu.
+
