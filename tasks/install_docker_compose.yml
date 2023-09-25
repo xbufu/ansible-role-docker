@@ -27,8 +27,9 @@
     dest: /usr/local/bin/docker-compose
     mode: a+x
 
-- name: Install docker-compose Python package
-  become: false
-  ansible.builtin.pip:
-    name: docker-compose
-    state: latest
+# - name: Install docker-compose Python package
+#   community.general.pipx:
+#     name: docker-compose
+#     install_deps: true
+#     install_apps: true
+#   become: false

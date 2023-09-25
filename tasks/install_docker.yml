@@ -1,15 +1,16 @@
 ---
-- name: Install docker packages
-  block:
-    - name: Install Docker engine
-      ansible.builtin.package:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-compose-plugin
-        state: present
+- name: Install Docker engine
+  ansible.builtin.package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
 
-    - name: Install Docker Module for Python
-      ansible.builtin.pip:
-        name: docker
+- name: Install Docker Module for Python
+  community.general.pipx:
+    name: docker
+    install_deps: true
+    install_apps: true
+  become: false
