@@ -1,12 +1,12 @@
 ---
-# - name: Remove old Docker installation
-#   ansible.builtin.include_tasks: remove_old_install.yml
+- name: Remove old Docker installation
+  ansible.builtin.include_tasks: remove_old_install.yml
 
-# - name: Install dependencies
-#   ansible.builtin.include_tasks: install_dependencies.yml
+- name: Install dependencies
+  ansible.builtin.include_tasks: install_dependencies.yml
 
-# - name: Add Docker repository
-#   ansible.builtin.include_tasks: add_docker_repository.yml
+- name: Add Docker repository
+  ansible.builtin.include_tasks: add_docker_repository.yml
 
 - name: Install Docker
   ansible.builtin.include_tasks: install_docker.yml
