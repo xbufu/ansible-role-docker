@@ -9,8 +9,14 @@
     state: present
 
 - name: Install Docker Module for Python
-  community.general.pipx:
+  ansible.builtin.pip:
     name: docker
-    install_deps: true
-    install_apps: true
+    extra_args: --user
   become: false
+
+# - name: Install Docker Module for Python
+#   community.general.pipx:
+#     name: docker
+#     install_deps: true
+#     install_apps: true
+#   become: false
