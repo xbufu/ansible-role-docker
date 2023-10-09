@@ -27,6 +27,12 @@
     dest: /usr/local/bin/docker-compose
     mode: a+x
 
+- name: Install docker-compose plugin
+  ansible.builtin.pip:
+    name: docker-compose
+    extra_args: --user
+  become: false
+
 # - name: Install docker-compose Python package
 #   community.general.pipx:
 #     name: docker-compose
