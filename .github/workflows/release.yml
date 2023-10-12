@@ -13,7 +13,7 @@ name: Release
 
 defaults:
   run:
-    working-directory: 'xbufu.packer'
+    working-directory: 'xbufu.docker'
 
 jobs:
 
