@@ -1,7 +1,7 @@
 Ansible Role: Docker
 =========
 
-An Ansible role to install Docker and Docker Compose on Linux distributions. Deploys Portainer Agent by default as well.
+An Ansible role to install Docker and Docker Compose on Linux distributions.
 
 Requirements
 ------------
