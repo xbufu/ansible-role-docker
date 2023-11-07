@@ -28,7 +28,7 @@
     path: /etc/apt/trusted.gpg.d/docker.gpg_armored
     state: absent
 
-  #https://git.deuxfleurs.fr/Deuxfleurs/infrastructure/src/commit/7852eef5a6d0eefc5914f178549f6845857a5c49/os/config/roles/common/tasks/docker.yml
+# https://git.deuxfleurs.fr/Deuxfleurs/infrastructure/src/commit/7852eef5a6d0eefc5914f178549f6845857a5c49/os/config/roles/common/tasks/docker.yml
 - name: Add Docker's repository to APT sources list
   ansible.builtin.apt_repository:
     repo: "deb [arch={{ architecture_map[ansible_architecture] }} signed-by=/etc/apt/trusted.gpg.d/docker.gpg] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
