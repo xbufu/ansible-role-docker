@@ -17,3 +17,7 @@
 
 - name: Add users to Docker group
   ansible.builtin.include_tasks: add_docker_users.yml
+
+- name: Deploy Portainer Agent
+  ansible.builtin.include_tasks: portainer_agent.yml
+  when: portainer_agent
