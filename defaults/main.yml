@@ -2,4 +2,4 @@
 docker_users:
   - "{{ ansible_user }}"
 install_compose_v1: false
-portainer_agent: true
+portainer_agent: false
