@@ -70,6 +70,7 @@ jobs:
         run: pip3 install ansible-core
 
       - name: Delete previous role release.
+        continue-on-error: true
         run: >-
           ansible-galaxy role delete --api-key ${{ secrets.GALAXY_API_KEY }}
           $(echo ${{ forgejo.repository }} | cut -d/ -f1) $(echo ${{ forgejo.repository }} | cut -d/ -f2)
