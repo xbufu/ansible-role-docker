@@ -14,6 +14,10 @@
 - name: Add users to Docker group
   ansible.builtin.include_tasks: add_docker_users.yml
 
+- name: Log into Docker registry
+  ansible.builtin.include_tasks: docker_login.yml
+  when: docker_registry_login
+
 - name: Deploy Periphery Agent
   ansible.builtin.include_tasks: periphery_agent.yml
   when: periphery_agent
