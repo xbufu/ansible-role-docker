@@ -1,9 +1,6 @@
 ---
-# This workflow requires a GALAXY_API_KEY secret present in the GitHub
+# This workflow requires a GALAXY_API_KEY secret present in the Forgejo
 # repository or organization.
-#
-# See: https://github.com/marketplace/actions/publish-ansible-role-to-galaxy
-# See: https://github.com/ansible/galaxy/issues/46
 
 name: Release
 'on':
@@ -22,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: 'xbufu.docker'
 
@@ -48,13 +45,21 @@ jobs:
           path: 'xbufu.docker'
 
       - name: Create latest release
-        uses: ncipollo/release-action@v1
-        with:
-          name: latest
-          tag: latest
-          allowUpdates: true
-          makeLatest: true
-          token: ${{ SECRETS.RELEASE_TOKEN }}
+        env:
+          FORGEJO_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          REPO: ${{ gitea.repository }}
+          SERVER_URL: ${{ gitea.server_url }}
+        run: |
+          RELEASE_ID=$(curl -s -H "Authorization: token $FORGEJO_TOKEN" \
+            "$SERVER_URL/api/v1/repos/$REPO/releases/tags/latest" | jq -r '.id // empty')
+          if [ -n "$RELEASE_ID" ]; then
+            curl -s -X DELETE -H "Authorization: token $FORGEJO_TOKEN" \
+              "$SERVER_URL/api/v1/repos/$REPO/releases/$RELEASE_ID"
+          fi
+          curl -s -X POST -H "Authorization: token $FORGEJO_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"tag_name":"latest","name":"latest","make_latest":true}' \
+            "$SERVER_URL/api/v1/repos/$REPO/releases"
 
       - name: Set up Python 3.
         uses: actions/setup-python@v5
@@ -67,9 +72,9 @@ jobs:
       - name: Delete previous role release.
         run: >-
           ansible-galaxy role delete --api-key ${{ secrets.GALAXY_API_KEY }}
-          $(echo ${{ github.repository }} | cut -d/ -f1) $(echo ${{ github.repository }} | cut -d/ -f2)
+          $(echo ${{ gitea.repository }} | cut -d/ -f1) $(echo ${{ gitea.repository }} | cut -d/ -f2)
 
       - name: Trigger a new import on Galaxy.
         run: >-
           ansible-galaxy role import --api-key ${{ secrets.GALAXY_API_KEY }}
-          $(echo ${{ github.repository }} | cut -d/ -f1) $(echo ${{ github.repository }} | cut -d/ -f2)
+          $(echo ${{ gitea.repository }} | cut -d/ -f1) $(echo ${{ gitea.repository }} | cut -d/ -f2)
