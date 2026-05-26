@@ -4,10 +4,10 @@
   register: docker_exists
   failed_when: false
   ignore_errors: true
-  changed_when: docker_exists.rc != 0
+  changed_when: false
 
 - name: Remove docker if already installed
-  when: docker_exists.rc != 0
+  when: docker_exists.rc == 0
   block:
     - name: Update aptitude repo and cache on all Debian/Ubuntu boxes
       ansible.builtin.apt:

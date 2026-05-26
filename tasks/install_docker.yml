@@ -13,19 +13,3 @@
     name: docker
     extra_args: --user
   become: false
-
-- name: Install docker-compose pip module
-  ansible.builtin.pip:
-    name: '{{ item }}'
-    extra_args: --user
-  become: false
-  loop:
-    - pyyaml==5.3.1
-    - docker-compose
-
-# - name: Install Docker Module for Python
-#   community.general.pipx:
-#     name: docker
-#     install_deps: true
-#     install_apps: true
-#   become: false
