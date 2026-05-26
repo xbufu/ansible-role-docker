@@ -13,3 +13,7 @@
 
 - name: Add users to Docker group
   ansible.builtin.include_tasks: add_docker_users.yml
+
+- name: Deploy Periphery Agent
+  ansible.builtin.include_tasks: periphery_agent.yml
+  when: periphery_agent
