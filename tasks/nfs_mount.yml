@@ -6,16 +6,18 @@
 
 - name: Ensure NFS mount point exists
   ansible.builtin.file:
-    path: "{{ nfs_mount_path }}"
+    path: "{{ item.path }}"
     state: directory
     mode: '0755'
+  loop: "{{ nfs_shares }}"
 
 - name: Mount NFS share and add to fstab
   ansible.posix.mount:
-    src: "{{ nfs_src }}"
-    path: "{{ nfs_mount_path }}"
+    src: "{{ item.src }}"
+    path: "{{ item.path }}"
     fstype: nfs
-    opts: "{{ nfs_opts }}"
+    opts: "{{ item.opts | default('vers=4') }}"
     dump: '0'
     passno: '0'
     state: mounted
+  loop: "{{ nfs_shares }}"

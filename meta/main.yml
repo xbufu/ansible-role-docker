@@ -2,7 +2,7 @@
 galaxy_info:
   role_name: docker
   author: xbufu
-  description: Install Docker and Docker Compose on Debian/Ubuntu. Optionally mounts NFS, logs into a registry, and deploys a Komodo Periphery agent.
+  description: Install Docker and Docker Compose on Debian/Ubuntu. Optionally mounts one or more NFS shares, logs into a registry, and deploys a Komodo Periphery agent.
   company: Bufu-Security
   license: MIT
   min_ansible_version: "2.14"

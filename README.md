@@ -1,6 +1,6 @@
 # Ansible Role: Docker
 
-An Ansible role to install Docker and Docker Compose on Debian/Ubuntu-based Linux distributions. Optionally mounts an NFS share, logs into a Docker registry, and deploys a Komodo Periphery agent.
+An Ansible role to install Docker and Docker Compose on Debian/Ubuntu-based Linux distributions. Optionally mounts one or more NFS shares, logs into a Docker registry, and deploys a Komodo Periphery agent.
 
 ## Requirements
 
@@ -20,13 +20,14 @@ docker_users:
 
 ### NFS Mount
 
-Mount an NFS share before Docker starts (e.g. for storing Docker data on a NAS).
+Mount one or more NFS shares before Docker starts (e.g. for storing Docker data on a NAS). Each entry requires `src` and `path`; `opts` is optional and defaults to `vers=4`.
 
 ```yml
 nfs_mount: false
-nfs_src: ""                  # e.g. 192.168.99.1:/mnt/tank/data/docker/devops/app-srv
-nfs_mount_path: /mnt/docker
-nfs_opts: vers=4
+nfs_shares:
+  - src: "192.168.99.1:/mnt/tank/data/docker/devops/app-srv"
+    path: /mnt/docker
+    opts: vers=4
 ```
 
 ### Docker Registry Login
@@ -65,7 +66,9 @@ None.
         docker_users:
           - bufu
         nfs_mount: true
-        nfs_src: "192.168.99.1:/mnt/tank/data/docker/devops/app-srv"
+        nfs_shares:
+          - src: "192.168.99.1:/mnt/tank/data/docker/devops/app-srv"
+            path: /mnt/docker
         docker_registry_login: true
         docker_registry_username: myuser
         docker_registry_api_key: "{{ vault_registry_api_key }}"
