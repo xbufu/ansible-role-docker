@@ -1,4 +1,8 @@
 ---
+- name: Mount NFS share
+  ansible.builtin.include_tasks: nfs_mount.yml
+  when: nfs_mount
+
 - name: Remove old Docker installation
   ansible.builtin.include_tasks: remove_old_install.yml
 

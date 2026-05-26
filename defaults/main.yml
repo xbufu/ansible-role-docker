@@ -3,6 +3,10 @@ docker_users:
   - "{{ ansible_user }}"
 periphery_agent: true
 periphery_root_dir: /mnt/docker/periphery
+nfs_mount: false
+nfs_src: ""
+nfs_mount_path: /mnt/docker
+nfs_opts: vers=4
 docker_registry_login: false
 docker_registry_url: "https://index.docker.io/v1/"
 docker_registry_username: ""
