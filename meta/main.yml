@@ -2,15 +2,18 @@
 galaxy_info:
   role_name: docker
   author: xbufu
-  description: Docker for Linux distributions.
+  description: Install Docker and Docker Compose on Debian/Ubuntu. Optionally mounts NFS, logs into a registry, and deploys a Komodo Periphery agent.
   company: Bufu-Security
-  license: license (BSD, MIT)
-  min_ansible_version: "2.1"
+  license: MIT
+  min_ansible_version: "2.14"
   platforms:
     - name: Debian
       versions:
         - all
     - name: Ubuntu
+      versions:
+        - all
+    - name: Kali
       versions:
         - all
 
