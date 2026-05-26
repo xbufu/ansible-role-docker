@@ -2,4 +2,4 @@
 docker_users:
   - "{{ ansible_user }}"
 periphery_agent: true
-periphery_root_dir: /mnt/docker/periphery
+periphery_root_dir: /etc/komodo
