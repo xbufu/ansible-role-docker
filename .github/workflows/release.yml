@@ -23,7 +23,7 @@ jobs:
     if: github.server_url == 'https://github.com'
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: 'xbufu.docker'
 
@@ -43,9 +43,11 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: github.server_url == 'https://github.com'
+    permissions:
+      contents: write
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: 'xbufu.docker'
 
@@ -56,7 +58,7 @@ jobs:
           tag: latest
           allowUpdates: true
           makeLatest: true
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Set up Python 3.
         uses: actions/setup-python@v5
