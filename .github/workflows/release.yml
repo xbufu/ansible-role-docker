@@ -1,6 +1,9 @@
 ---
-# This workflow requires a GALAXY_API_KEY secret present in the Forgejo
+# This workflow requires a GALAXY_API_KEY secret present in the GitHub
 # repository or organization.
+#
+# See: https://github.com/marketplace/actions/publish-ansible-role-to-galaxy
+# See: https://github.com/ansible/galaxy/issues/46
 
 name: Release
 'on':
@@ -17,9 +20,10 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    if: github.server_url == 'https://github.com'
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           path: 'xbufu.docker'
 
@@ -38,6 +42,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    if: github.server_url == 'https://github.com'
     steps:
       - name: Check out the codebase.
         uses: actions/checkout@v4
@@ -45,21 +50,13 @@ jobs:
           path: 'xbufu.docker'
 
       - name: Create latest release
-        env:
-          FORGEJO_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          REPO: ${{ forgejo.repository }}
-          SERVER_URL: ${{ forgejo.server_url }}
-        run: |
-          RELEASE_ID=$(curl -s -H "Authorization: token $FORGEJO_TOKEN" \
-            "$SERVER_URL/api/v1/repos/$REPO/releases/tags/latest" | jq -r '.id // empty')
-          if [ -n "$RELEASE_ID" ]; then
-            curl -s -X DELETE -H "Authorization: token $FORGEJO_TOKEN" \
-              "$SERVER_URL/api/v1/repos/$REPO/releases/$RELEASE_ID"
-          fi
-          curl -s -X POST -H "Authorization: token $FORGEJO_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d '{"tag_name":"latest","name":"latest","make_latest":true}' \
-            "$SERVER_URL/api/v1/repos/$REPO/releases"
+        uses: ncipollo/release-action@v1
+        with:
+          name: latest
+          tag: latest
+          allowUpdates: true
+          makeLatest: true
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Set up Python 3.
         uses: actions/setup-python@v5
@@ -73,9 +70,9 @@ jobs:
         continue-on-error: true
         run: >-
           ansible-galaxy role delete --api-key ${{ secrets.GALAXY_API_KEY }}
-          $(echo ${{ forgejo.repository }} | cut -d/ -f1) $(echo ${{ forgejo.repository }} | cut -d/ -f2)
+          $(echo ${{ github.repository }} | cut -d/ -f1) $(echo ${{ github.repository }} | cut -d/ -f2)
 
       - name: Trigger a new import on Galaxy.
         run: >-
           ansible-galaxy role import --api-key ${{ secrets.GALAXY_API_KEY }}
-          $(echo ${{ forgejo.repository }} | cut -d/ -f1) $(echo ${{ forgejo.repository }} | cut -d/ -f2)
+          $(echo ${{ github.repository }} | cut -d/ -f1) $(echo ${{ github.repository }} | cut -d/ -f2)
