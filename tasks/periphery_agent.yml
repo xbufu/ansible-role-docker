@@ -5,27 +5,8 @@
     state: directory
     mode: '0755'
 
-- name: Check if periphery is installed
-  ansible.builtin.stat:
-    path: /usr/local/bin/periphery
-  register: periphery_binary
-
-- name: Install periphery agent
-  when: not periphery_binary.stat.exists
-  block:
-    - name: Download periphery setup script
-      ansible.builtin.get_url:
-        url: "https://raw.githubusercontent.com/moghtech/komodo/{{ periphery_version }}/scripts/setup-periphery.py"
-        dest: /tmp/setup-periphery.py
-        mode: '0700'
-
-    - name: Run periphery setup script
-      ansible.builtin.command: >-
-        python3 /tmp/setup-periphery.py
-        --version {{ periphery_version }}
-        --root-directory {{ periphery_root_dir }}
-      args:
-        creates: /usr/local/bin/periphery
+- name: Install or upgrade periphery binary
+  ansible.builtin.include_tasks: periphery_binary.yml
 
 # force: false so a re-run never overwrites a config with hand-added [secrets]
 - name: Deploy periphery config if missing

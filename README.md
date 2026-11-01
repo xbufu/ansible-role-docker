@@ -51,9 +51,17 @@ periphery_root_dir: /mnt/docker/periphery
 periphery_version: v2.3.3
 ```
 
-Periphery is installed once, from the setup script of the pinned `periphery_version` tag. An existing install is not upgraded.
+The Periphery binary is installed or upgraded to `periphery_version` (`latest` allowed). It is never downgraded, because Periphery must not be newer than Komodo Core: upgrade Core first. An upgrade swaps the binary and restarts the service.
 
 The config is written from `templates/periphery.config.toml.tpl` only if `periphery.config.toml` doesn't exist yet. After that the role never overwrites it, so hand edits (for example a `[secrets]` table) survive re-runs. The role does enforce mode `0600`, owner root. Periphery is restarted only when the config or the systemd unit changes.
+
+### sops and age
+
+On hosts with `periphery_agent: true`, the role installs `age` (apt) and a pinned `sops` binary. The binary is verified against the release `checksums.txt`. The role also generates a host age key at `/etc/sops/age.key` (mode `0600`, root). The key is created on the host, so it never leaves it, and an existing key is never overwritten. The host's public key is printed at the end of the play. Add it to `.sops.yaml` in the docker repo.
+
+```yml
+sops_version: v3.13.3  # or latest
+```
 
 ## Dependencies
 

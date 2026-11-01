@@ -1,0 +1,26 @@
+---
+# Installs or upgrades /usr/local/bin/sops to sops_version ("latest" allowed), checksum-verified.
+- name: Resolve latest sops release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/getsops/sops/releases/latest
+    return_content: true
+  delegate_to: localhost
+  become: false
+  run_once: true
+  check_mode: false
+  register: _sops_release
+  when: sops_version == 'latest'
+
+- name: Set target sops version
+  ansible.builtin.set_fact:
+    _sops_target: "{{ _sops_release.json.tag_name if sops_version == 'latest' else sops_version }}"
+
+# get_url re-downloads when the existing file doesn't match the target's checksum
+- name: Install sops
+  ansible.builtin.get_url:
+    url: "https://github.com/getsops/sops/releases/download/{{ _sops_target }}/sops-{{ _sops_target }}.linux.{{ _sops_arch }}"
+    checksum: "sha256:https://github.com/getsops/sops/releases/download/{{ _sops_target }}/sops-{{ _sops_target }}.checksums.txt"
+    dest: /usr/local/bin/sops
+    mode: '0755'
+  vars:
+    _sops_arch: "{{ {'x86_64': 'amd64', 'aarch64': 'arm64'}[ansible_facts['architecture']] }}"

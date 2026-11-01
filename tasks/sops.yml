@@ -1,0 +1,44 @@
+---
+- name: Ensure age is installed
+  ansible.builtin.package:
+    name: age
+    state: present
+
+- name: Install or upgrade sops binary
+  ansible.builtin.include_tasks: sops_binary.yml
+
+- name: Ensure sops key directory exists
+  ansible.builtin.file:
+    path: /etc/sops
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+# Generated on the host so the private key never leaves it; never overwritten.
+- name: Generate host age key
+  ansible.builtin.command: age-keygen -o /etc/sops/age.key
+  args:
+    creates: /etc/sops/age.key
+  register: _sops_keygen
+
+- name: Restrict host age key permissions
+  ansible.builtin.file:
+    path: /etc/sops/age.key
+    owner: root
+    group: root
+    mode: '0600'
+  # in check mode a new key isn't generated yet, so there is nothing to touch or read
+  when: not (ansible_check_mode and _sops_keygen is changed)
+
+- name: Read host age public key
+  ansible.builtin.command: age-keygen -y /etc/sops/age.key
+  register: _sops_age_pubkey
+  changed_when: false
+  check_mode: false
+  when: not (ansible_check_mode and _sops_keygen is changed)
+
+- name: Show host age public key (add to .sops.yaml)
+  ansible.builtin.debug:
+    msg: "{{ inventory_hostname }}: {{ _sops_age_pubkey.stdout }}"
+  when: _sops_age_pubkey is not skipped

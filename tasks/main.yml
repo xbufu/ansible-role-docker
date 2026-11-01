@@ -22,6 +22,10 @@
   ansible.builtin.include_tasks: docker_login.yml
   when: docker_registry_login
 
+- name: Install sops and age
+  ansible.builtin.include_tasks: sops.yml
+  when: periphery_agent
+
 - name: Deploy Periphery Agent
   ansible.builtin.include_tasks: periphery_agent.yml
   when: periphery_agent

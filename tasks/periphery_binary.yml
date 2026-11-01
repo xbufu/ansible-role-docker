@@ -1,0 +1,51 @@
+---
+# Installs or upgrades /usr/local/bin/periphery to periphery_version ("latest" allowed).
+# Never downgrades: Periphery must not be newer than Core, so upgrade Core first.
+- name: Resolve latest Komodo release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/moghtech/komodo/releases/latest
+    return_content: true
+  delegate_to: localhost
+  become: false
+  run_once: true
+  check_mode: false
+  register: _periphery_release
+  when: periphery_version == 'latest'
+
+- name: Set target periphery version
+  ansible.builtin.set_fact:
+    _periphery_target: "{{ (_periphery_release.json.tag_name if periphery_version == 'latest' else periphery_version) | regex_replace('^v', '') }}"
+
+- name: Get installed periphery version
+  ansible.builtin.command: /usr/local/bin/periphery -V
+  register: _periphery_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Install periphery binary
+  when: >-
+    _periphery_installed.rc != 0
+    or (_periphery_installed.stdout.split() | last) is version(_periphery_target, '<')
+  block:
+    - name: Download periphery binary
+      ansible.builtin.get_url:
+        url: "https://github.com/moghtech/komodo/releases/download/v{{ _periphery_target }}/periphery-{{ ansible_facts['architecture'] }}"
+        dest: "/tmp/periphery-{{ _periphery_target }}"
+        mode: '0755'
+
+    # copy swaps the file atomically, so the running agent keeps working until the restart
+    - name: Install periphery binary
+      ansible.builtin.copy:
+        src: "/tmp/periphery-{{ _periphery_target }}"
+        dest: /usr/local/bin/periphery
+        remote_src: true
+        mode: '0755'
+      notify: Restart periphery
+      # in check mode nothing was downloaded; the download task already reports the upgrade
+      when: not ansible_check_mode
+
+    - name: Remove downloaded periphery binary
+      ansible.builtin.file:
+        path: "/tmp/periphery-{{ _periphery_target }}"
+        state: absent
