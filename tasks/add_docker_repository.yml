@@ -1,9 +1,17 @@
 ---
-- name: Remove gpg keys if they exist #otherwise GPG doesn't run if file already exists
+# Older role versions trusted the key for all repos via trusted.gpg.d; drop that line first,
+# otherwise apt fails on two conflicting Signed-By values for the same repo.
+- name: Remove Docker source line that uses the old key location
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/docker.list
+    regexp: 'trusted\.gpg\.d/docker\.gpg'
+    state: absent
+
+- name: Remove old Docker gpg keys
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
-  with_items:
+  loop:
     - /etc/apt/trusted.gpg.d/docker.gpg
     - /etc/apt/trusted.gpg.d/docker.gpg_armored
 
@@ -12,25 +20,22 @@
     _docker_distribution: "{{ 'Debian' if ansible_facts['distribution'] == 'Kali' else ansible_facts['distribution'] }}"
     _docker_distribution_release: "{{ 'bookworm' if ansible_facts['distribution'] == 'Kali' else ansible_facts['distribution_release'] }}"
 
+- name: Ensure apt keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
 - name: Download Docker gpg key
   ansible.builtin.get_url:
     url: https://download.docker.com/linux/{{ _docker_distribution | lower }}/gpg
-    dest: /etc/apt/trusted.gpg.d/docker.gpg_armored
-
-- name: De-Armor Docker GPG key
-  ansible.builtin.shell: gpg --dearmor < /etc/apt/trusted.gpg.d/docker.gpg_armored > /etc/apt/trusted.gpg.d/docker.gpg
-  args:
-    creates: /etc/apt/trusted.gpg.d/docker.gpg
-
-- name: Remove armored key
-  ansible.builtin.file:
-    path: /etc/apt/trusted.gpg.d/docker.gpg_armored
-    state: absent
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
 
 # https://git.deuxfleurs.fr/Deuxfleurs/infrastructure/src/commit/7852eef5a6d0eefc5914f178549f6845857a5c49/os/config/roles/common/tasks/docker.yml
 - name: Add Docker's repository to APT sources list
   ansible.builtin.apt_repository:
-    repo: "deb [arch={{ architecture_map[ansible_facts['architecture']] }} signed-by=/etc/apt/trusted.gpg.d/docker.gpg] https://download.docker.com/linux/{{ _docker_distribution | lower }} {{ _docker_distribution_release }} stable"
+    repo: "deb [arch={{ architecture_map[ansible_facts['architecture']] }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/{{ _docker_distribution | lower }} {{ _docker_distribution_release }} stable"
     state: present
     filename: docker
     update_cache: true

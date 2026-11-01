@@ -1,5 +1,8 @@
 [Unit]
 Description=Agent to connect with Komodo Core
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor={{ periphery_root_dir }}
 
 [Service]
 Environment="HOME=/root"

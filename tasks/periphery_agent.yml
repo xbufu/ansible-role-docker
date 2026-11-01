@@ -1,45 +1,54 @@
 ---
-- name: Gather service facts
-  ansible.builtin.service_facts:
-
-- name: Ensure rsync is installed
-  ansible.builtin.package:
-    name: rsync
-    state: present
-
 - name: Ensure periphery root directory exists
   ansible.builtin.file:
     path: "{{ periphery_root_dir }}"
     state: directory
     mode: '0755'
 
+- name: Check if periphery is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/periphery
+  register: periphery_binary
+
 - name: Install periphery agent
-  ansible.builtin.shell: >-
-    curl -sSfL https://raw.githubusercontent.com/moghtech/komodo/main/scripts/setup-periphery.py
-    | python3 - --root-directory {{ periphery_root_dir }}
-  when: "'periphery.service' not in ansible_facts.services"
+  when: not periphery_binary.stat.exists
+  block:
+    - name: Download periphery setup script
+      ansible.builtin.get_url:
+        url: "https://raw.githubusercontent.com/moghtech/komodo/{{ periphery_version }}/scripts/setup-periphery.py"
+        dest: /tmp/setup-periphery.py
+        mode: '0700'
 
-- name: Stop periphery service before modifying files
-  ansible.builtin.systemd:
-    name: periphery
-    state: stopped
-    daemon_reload: true
+    - name: Run periphery setup script
+      ansible.builtin.command: >-
+        python3 /tmp/setup-periphery.py
+        --version {{ periphery_version }}
+        --root-directory {{ periphery_root_dir }}
+      args:
+        creates: /usr/local/bin/periphery
 
-- name: Deploy periphery config
+# force: false so a re-run never overwrites a config with hand-added [secrets]
+- name: Deploy periphery config if missing
   ansible.builtin.template:
     src: periphery.config.toml.tpl
     dest: "{{ periphery_root_dir }}/periphery.config.toml"
-    mode: '0644'
+    mode: '0600'
+    force: false
+  notify: Restart periphery
 
-- name: Sync /etc/komodo files to periphery root directory
-  ansible.builtin.shell: rsync -avzP /etc/komodo/ {{ periphery_root_dir }}/
-  changed_when: false
+- name: Restrict periphery config permissions
+  ansible.builtin.file:
+    path: "{{ periphery_root_dir }}/periphery.config.toml"
+    owner: root
+    group: root
+    mode: '0600'
 
 - name: Update periphery service file to use correct config path
   ansible.builtin.template:
     src: periphery.service.tpl
     dest: /etc/systemd/system/periphery.service
     mode: '0644'
+  notify: Restart periphery
 
 - name: Ensure periphery service is enabled and started
   ansible.builtin.systemd:

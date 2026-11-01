@@ -48,9 +48,12 @@ Install and configure the [Komodo](https://github.com/moghtech/komodo) Periphery
 ```yml
 periphery_agent: true
 periphery_root_dir: /mnt/docker/periphery
+periphery_version: v2.3.3
 ```
 
-The config template is located at `templates/periphery.config.toml.tpl`. Customize it before running the role.
+Periphery is installed once, from the setup script of the pinned `periphery_version` tag. An existing install is not upgraded.
+
+The config is written from `templates/periphery.config.toml.tpl` only if `periphery.config.toml` doesn't exist yet. After that the role never overwrites it, so hand edits (for example a `[secrets]` table) survive re-runs. The role does enforce mode `0600`, owner root. Periphery is restarted only when the config or the systemd unit changes.
 
 ## Dependencies
 
